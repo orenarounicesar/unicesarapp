@@ -37,10 +37,6 @@ public class MainView extends VerticalSplitPanel implements View {
     private Button btnConsultar;
     private HorizontalLayout layoutImages;
     
-    private String cadenaSql;
-    private String nombreAsignaturaSeleccionada, nombreCorte;
-    private final int codigoCorte = 1;
-    
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         lblTitulo = new Label("Notas");
@@ -67,7 +63,6 @@ public class MainView extends VerticalSplitPanel implements View {
         btnRegistrar.setHeight("450px");
         btnRegistrar.setStyleName(ValoTheme.BUTTON_LINK);
         btnRegistrar.setEnabled(SeveralProcesses.getCodigoDocenteEnSesion() != null);
-        System.out.println(SeveralProcesses.getCodigoDocenteEnSesion());
         
         btnConsultar = new Button(new ThemeResource("images/consultar.jpg"));
         btnConsultar.setWidth("450px");

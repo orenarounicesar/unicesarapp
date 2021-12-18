@@ -66,11 +66,14 @@ public class MainView extends VerticalSplitPanel implements View {
         btnRegistrar.setWidth("450px");
         btnRegistrar.setHeight("450px");
         btnRegistrar.setStyleName(ValoTheme.BUTTON_LINK);
+        btnRegistrar.setEnabled(SeveralProcesses.getCodigoDocenteEnSesion() != null);
+        System.out.println(SeveralProcesses.getCodigoDocenteEnSesion());
         
         btnConsultar = new Button(new ThemeResource("images/consultar.jpg"));
         btnConsultar.setWidth("450px");
         btnConsultar.setHeight("450px");
         btnConsultar.setStyleName(ValoTheme.BUTTON_LINK);
+        btnConsultar.setEnabled(SeveralProcesses.getCodigoEstudianteEnSesion() != null);
         
         layoutImages = new HorizontalLayout(btnRegistrar, btnConsultar);
         layoutImages.setComponentAlignment(btnRegistrar, Alignment.MIDDLE_CENTER);

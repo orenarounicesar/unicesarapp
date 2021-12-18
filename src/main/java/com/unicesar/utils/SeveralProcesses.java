@@ -2031,6 +2031,10 @@ public class SeveralProcesses {
         return UI.getCurrent().getSession().getAttribute(VariablesSesion.CODIGO_DOCENTE);
     }
     
+    public static Object getCodigoEstudianteEnSesion() {
+        return UI.getCurrent().getSession().getAttribute(VariablesSesion.CODIGO_ESTUDAINTE);
+    }
+    
     public static void cerrarSesion() {
         UI.getCurrent().getSession().setAttribute(VariablesSesion.LOGIN, null);
         UI.getCurrent().getSession().setAttribute(VariablesSesion.NOMBRE_USUARIO, null);

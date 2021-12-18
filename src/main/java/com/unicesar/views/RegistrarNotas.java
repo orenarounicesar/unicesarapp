@@ -15,6 +15,7 @@ import com.unicesar.utils.GestionarNota;
 import com.unicesar.utils.Settings;
 import com.unicesar.utils.SeveralProcesses;
 import com.unicesar.utils.StandarEmailSender;
+import com.unicesar.utils.Views;
 import com.vaadin.data.Property;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
@@ -30,6 +31,7 @@ import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
 import java.sql.ResultSet;
@@ -64,10 +66,10 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
         lblTitulo.setWidthUndefined();
         lblTitulo.setStyleName("titulo");
         lblTitulo.addStyleName("textoEnormeRojo");
-        lblSalir = new LabelClick("Cerrar Sesión" + VaadinIcons.EXIT_O.getHtml(), false);
+        lblSalir = new LabelClick(VaadinIcons.ARROW_LEFT.getHtml() + " Atras", false);
         lblSalir.setWidthUndefined();
         lblSalir.layoutLabel.addLayoutClickListener(e -> {
-            SeveralProcesses.cerrarSesion();
+            UI.getCurrent().getNavigator().navigateTo(Views.MAIN);
         });
         lblNombreDocente = new Label("Docente: <strong>" + getNombreDocente(SeveralProcesses.getCodigoDocenteEnSesion()) + "</strong>", ContentMode.HTML);
         lblNombreDocente.setWidthUndefined();

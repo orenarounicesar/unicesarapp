@@ -102,7 +102,7 @@ public class LoginView extends VerticalLayout implements View {
                 + "a.codigo_docente, "
                 + "a.codigo_estudiante "
             + "FROM usuarios a " 
-            + "WHERE BINARY a.login = '" + txtLogin.getValue().trim() +"' AND a.password = md5('" +  txtPassword.getValue().trim() + "') AND a.activo = 1  " 
+            + "WHERE BINARY a.login = '" + txtLogin.getValue() +"' AND a.password = md5('" +  txtPassword.getValue() + "') AND a.activo = 1  " 
             + "LIMIT 1";
         GestionDB objConnect = null;
         try {
@@ -114,7 +114,7 @@ public class LoginView extends VerticalLayout implements View {
                 UI.getCurrent().getSession().setAttribute(VariablesSesion.NOMBRE_USUARIO, rs.getString("nombre_usuario"));                    
                 UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_DOCENTE, rs.getString("codigo_docente"));
                 UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_ESTUDAINTE, rs.getString("codigo_estudiante"));
-                UI.getCurrent().getNavigator().navigateTo(Views.REGISTRARNOTAS);
+                UI.getCurrent().getNavigator().navigateTo(Views.MAIN);
             } else {
                 Notification.show("Usuario y/o Contraseña Inconrectos", Notification.Type.HUMANIZED_MESSAGE);
             }

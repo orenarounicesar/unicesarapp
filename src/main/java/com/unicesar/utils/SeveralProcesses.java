@@ -1,6 +1,7 @@
 
 package com.unicesar.utils;
 
+import com.unicesar.beans.Asignatura;
 import com.unicesar.beans.DatosFilasTablas;
 import com.unicesar.businesslogic.GestionDB;
 import com.unicesar.businesslogic.GestionDBException;
@@ -32,6 +33,9 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.TwinColSelect;
 import com.vaadin.ui.UI;
 import eu.maxschuster.vaadin.autocompletetextfield.AutocompleteTextField;
+import io.aexp.nodes.graphql.GraphQLRequestEntity;
+import io.aexp.nodes.graphql.GraphQLResponseEntity;
+import io.aexp.nodes.graphql.GraphQLTemplate;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -50,6 +54,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.naming.NamingException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.vaadin.teemu.switchui.Switch;
 import org.vaadin.ui.NumberField;
 
@@ -963,5 +968,17 @@ public class SeveralProcesses {
         UI.getCurrent().getSession().close();
         UI.getCurrent().close();
         UI.getCurrent().getNavigator().navigateTo(Views.REGISTRARNOTAS);
+    }
+    
+    
+    public static GraphQLResponseEntity<Asignatura> callGraphQLService(String url, String query) throws IOException {
+        GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+
+        GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+                .url(StringUtils.join(url, "?query=", query))
+                .request(Asignatura.class)
+                .build();
+
+        return graphQLTemplate.query(requestEntity, Asignatura.class);
     }
 }

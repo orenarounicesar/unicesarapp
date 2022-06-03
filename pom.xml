@@ -29,6 +29,10 @@
 			<id>vaadin-addons</id>
 			<url>http://maven.vaadin.com/vaadin-addons</url>
 		</repository>
+                <repository>
+                        <id>jitpack.io</id>
+                        <url>https://jitpack.io</url>
+                </repository>
 	</repositories>
 
 	<dependencyManagement>
@@ -155,6 +159,16 @@
 	  <version>4.7.4.Final</version>
 	  <type>jar</type>
 	 </dependency>
+         <dependency>
+             <groupId>com.github.americanexpress.nodes</groupId>
+             <artifactId>nodes</artifactId>
+             <version>0.5.0</version>
+         </dependency>
+         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+         </dependency>
 	</dependencies>
 
 	<build>

@@ -37,7 +37,7 @@ public class MyUI extends UI {
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         Settings settings = new Settings();
-        
+        Settings.cargarEndPonts();
         navigator = new Navigator(this, this);
         
         Views.setViewsUI(navigator);

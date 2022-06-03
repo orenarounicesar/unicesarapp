@@ -3,10 +3,8 @@ package com.unicesar.businesslogic;
 
 import com.unicesar.utils.CloseConnection;
 import com.unicesar.utils.Settings;
-import com.unicesar.utils.VariablesSesion;
 import com.vaadin.data.util.sqlcontainer.connection.J2EEConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
-import com.vaadin.ui.UI;
 import java.io.ByteArrayOutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,9 +14,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 public class GestionDB {
     
@@ -36,8 +32,7 @@ public class GestionDB {
         vJndi = "unicesarappjndi";
         llaveTabla = null;
         nombreTabla = null;
-        this.verificarCierreConexion = Settings.VERIFICARCIERRECONEXION;
-        conexionCerrada = true;
+        this.verificarCierreConexion = Settings.VERIFICARCIERRECONEXION;        conexionCerrada = true;
         this.conectar();
     }
     
@@ -53,7 +48,7 @@ public class GestionDB {
     public void conectar() throws NamingException, SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            this.conexion = DriverManager.getConnection("jdbc:mysql://192.168.1.10:3306/unicesarappdb?useSSL=false", "orenaro", "orenaro");
+            this.conexion = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/unicesarappdb?useSSL=false", "root", "root");
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(GestionDB.class.getName()).log(Level.SEVERE, null, ex);
         }

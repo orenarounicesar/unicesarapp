@@ -1,6 +1,7 @@
 package com.unicesar.views;
 
-import com.unicesar.businesslogic.GestionDB;
+import com.unicesar.beans.Usuario;
+import com.unicesar.utils.Enrutador;
 import com.unicesar.utils.VariablesSesion;
 import com.unicesar.utils.SeveralProcesses;
 import com.unicesar.utils.Views;
@@ -17,11 +18,6 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.naming.NamingException;
 
 public class LoginView extends VerticalLayout implements View {
     
@@ -30,8 +26,6 @@ public class LoginView extends VerticalLayout implements View {
     private Button btnIngresar;
     private FormLayout layoutLogin;
     private Panel panelLogin;
-    
-    private String cadenaSql;
     
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
@@ -95,39 +89,16 @@ public class LoginView extends VerticalLayout implements View {
     }
     
     private void validarLogin() {
-        cadenaSql = "SELECT "
-                + "a.codigo_usuario, "
-                + "a.login, "
-                + "a.nombre_usuario, "
-                + "a.codigo_docente, "
-                + "a.codigo_estudiante "
-            + "FROM usuarios a " 
-            + "WHERE BINARY a.login = '" + txtLogin.getValue() +"' AND a.password = md5('" +  txtPassword.getValue() + "') AND a.activo = 1  " 
-            + "LIMIT 1";
-        GestionDB objConnect = null;
-        try {
-            objConnect = new GestionDB();
-            ResultSet rs = objConnect.consultar(cadenaSql);
-            if ( rs.next() ) {
-                UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_USUARIO, rs.getString("codigo_usuario"));
-                UI.getCurrent().getSession().setAttribute(VariablesSesion.LOGIN, rs.getString("login"));
-                UI.getCurrent().getSession().setAttribute(VariablesSesion.NOMBRE_USUARIO, rs.getString("nombre_usuario"));                    
-                UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_DOCENTE, rs.getString("codigo_docente"));
-                UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_ESTUDAINTE, rs.getString("codigo_estudiante"));
-                UI.getCurrent().getNavigator().navigateTo(Views.MAIN);
-            } else {
-                Notification.show("Usuario y/o Contraseña Inconrectos", Notification.Type.HUMANIZED_MESSAGE);
-            }
-        } catch (NamingException | SQLException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, cadenaSql, ex);
-        } finally {
-            try {
-                if (objConnect != null) {
-                    objConnect.desconectar();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Cerrando Conexión Login", ex);
-            }
+        Usuario usuario = Enrutador.getVendedorById(txtLogin.getValue(), txtPassword.getValue());
+        if ( usuario.getCodigoUsuario() == 0 ) {
+            Notification.show("Usuario y/o Contraseña Inconrectos", Notification.Type.HUMANIZED_MESSAGE);
+        } else {
+            UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_USUARIO, usuario.getCodigoUsuario());
+            UI.getCurrent().getSession().setAttribute(VariablesSesion.LOGIN, usuario.getLogin());
+            UI.getCurrent().getSession().setAttribute(VariablesSesion.NOMBRE_USUARIO, usuario.getNombreUsuario());                    
+            UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_DOCENTE, usuario.getCodigoDocente());
+            UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_ESTUDAINTE, usuario.getCodigoEstudiante());
+            UI.getCurrent().getNavigator().navigateTo(Views.MAIN);
         }
     }
 }

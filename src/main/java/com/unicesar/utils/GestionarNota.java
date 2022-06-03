@@ -5,11 +5,7 @@
  */
 package com.unicesar.utils;
 
-import com.unicesar.businesslogic.GestionDB;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.naming.NamingException;
+import com.unicesar.beans.NotaDatos;
 
 /**
  *
@@ -17,28 +13,22 @@ import javax.naming.NamingException;
  */
 public class GestionarNota extends Thread {
 
-    private final String cadenaSql;
+    private final int codigoEstudianteAsignatura;
+    private final int codigoCorte;
+    private final NotaDatos notaDatos;
     
-    public GestionarNota(String cadenaSql) {
-        this.cadenaSql = cadenaSql;
+    public GestionarNota(int codigoEstudianteAsignatura, int codigoCorte, NotaDatos notaDatos) {
+        this.codigoEstudianteAsignatura = codigoEstudianteAsignatura;
+        this.codigoCorte = codigoCorte;
+        this.notaDatos = notaDatos;
     }
     
     @Override
     public void run() {
-        GestionDB objConnect = null;
-        try {
-            objConnect = new GestionDB();
-            objConnect.insertarActualizarBorrar(cadenaSql, false);
-        } catch (NamingException | SQLException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-        } finally {
-            try {
-                if (objConnect != null) {
-                    objConnect.desconectar();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-            }
-        }
+        System.out.println(notaDatos);
+        if ( notaDatos == null )
+            Enrutador.deleteNota(codigoEstudianteAsignatura, codigoCorte);
+        else
+            Enrutador.agregarNota(notaDatos);
     }
 }

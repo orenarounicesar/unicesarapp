@@ -14,6 +14,7 @@ public class Settings {
     public static int SEGUNDOSCERRARCONEXION;
     public static String EMAILORIGEN;
     public static String EMAILPASSWORD;
+    public static String APIRESTNOTAS;
     
     public Settings() {
             MINUTOSSESION = 30;
@@ -34,5 +35,9 @@ public class Settings {
 //        } catch (IOException ex) {
 //            Logger.getLogger(Settings.class.getName()).log(Level.SEVERE, "Cargando properties - " + SeveralProcesses.getSessionUser(), ex);
 //        }
+    }
+    
+    public static void cargarEndPonts() {
+        APIRESTNOTAS = "http://localhost:3100";
     }
 }

@@ -974,11 +974,17 @@ public class SeveralProcesses {
     public static GraphQLResponseEntity<Asignatura> callGraphQLService(String url, String query) throws IOException {
         GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
 
+//        GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+//                .url(StringUtils.join(url, "?query=", query))
+//                .request(Asignatura.class)
+//                .build();
+
         GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
-                .url(StringUtils.join(url, "?query=", query))
-                .request(Asignatura.class)
+                .url(url)
+                .request(query)
                 .build();
 
-        return graphQLTemplate.query(requestEntity, Asignatura.class);
+//        return graphQLTemplate.query(requestEntity, Asignatura.class);
+        return graphQLTemplate.query(requestEntity, String.class);
     }
 }

@@ -94,7 +94,7 @@ public class LoginView extends VerticalLayout implements View {
         
         try {
             GraphQLResponseEntity<Asignatura> responseEntity = SeveralProcesses.callGraphQLService(
-                    "http://localhost:5000/graphiql", "{classById(id:1){codigoAsignatura nombreAsignatura}}"
+                    "http://localhost:5000/graphql", "{classById(id:1){codigoAsignatura,nombreAsignatura}}"
             );
             System.out.println(responseEntity.getResponse().getNombreAsignatura());
         } catch (IOException ex) {

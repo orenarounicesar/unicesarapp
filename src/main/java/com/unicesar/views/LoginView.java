@@ -1,6 +1,5 @@
 package com.unicesar.views;
 
-import com.unicesar.beans.Asignatura;
 import com.unicesar.beans.Usuario;
 import com.unicesar.utils.Enrutador;
 import com.unicesar.utils.VariablesSesion;
@@ -19,10 +18,6 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import io.aexp.nodes.graphql.GraphQLResponseEntity;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class LoginView extends VerticalLayout implements View {
     
@@ -92,18 +87,19 @@ public class LoginView extends VerticalLayout implements View {
         this.addComponent(panelLogin);
         this.setComponentAlignment(panelLogin, Alignment.MIDDLE_CENTER);
         
-        try {
-            GraphQLResponseEntity<Asignatura> responseEntity = SeveralProcesses.callGraphQLService(
-                    "http://localhost:5000/graphql", "{classById(id:1){codigoAsignatura,nombreAsignatura}}"
-            );
-            System.out.println(responseEntity.getResponse().getNombreAsignatura());
-        } catch (IOException ex) {
-            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        try {
+//            GraphQLResponseEntity<AsignaturaGraphql> responseEntity = SeveralProcesses.callGraphQLService(
+//                    "http://localhost:5000/graphql", "{classById(id:1){codigoAsignatura,nombreAsignatura}}"
+//            );
+//            System.out.println(responseEntity.getResponse().getClassById().toString());
+//        } catch (IOException ex) {
+//            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+        
     }
     
     private void validarLogin() {
-        Usuario usuario = Enrutador.getVendedorById(txtLogin.getValue(), txtPassword.getValue());
+        Usuario usuario = Enrutador.getLogin(txtLogin.getValue(), txtPassword.getValue());
         if ( usuario.getCodigoUsuario() == 0 ) {
             Notification.show("Usuario y/o Contraseña Inconrectos", Notification.Type.HUMANIZED_MESSAGE);
         } else {

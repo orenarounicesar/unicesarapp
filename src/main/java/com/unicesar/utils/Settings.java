@@ -15,6 +15,7 @@ public class Settings {
     public static String EMAILORIGEN;
     public static String EMAILPASSWORD;
     public static String APIRESTNOTAS;
+    public static String ENDPOINTGRAPHQL;
     
     public Settings() {
             MINUTOSSESION = 30;
@@ -22,6 +23,7 @@ public class Settings {
             SEGUNDOSCERRARCONEXION = 290;
             EMAILORIGEN = "orenarotest@gmail.com";
             EMAILPASSWORD = "39087327Br";
+            ENDPOINTGRAPHQL = "http://localhost:5000/graphql";
         
 //        try {
 //            RUTADIRECTORIOTEMPORAL = System.getProperty("jboss.server.temp.dir");

@@ -218,27 +218,7 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
     }
     
     private boolean isNotaAlmacenada(int codigoEstudianteAsignatura, int codigoCorte) {
-        cadenaSql = "SELECT a.codigo_nota "
-                + "FROM notas a "
-                + "WHERE a.codigo_estudiante_asignatura = " + codigoEstudianteAsignatura + " AND a.codigo_corte = " + codigoCorte;
-        GestionDB objConnect = null;
-        try {
-            objConnect = new GestionDB();
-            ResultSet rs = objConnect.consultar(cadenaSql);
-            if ( rs.next() )
-                return true;
-        } catch (NamingException | SQLException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-        } finally {
-            try {
-                if (objConnect != null) {
-                    objConnect.desconectar();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-            }
-        }
-        return false;
+        return Enrutador.isNotaAlmacenada(codigoEstudianteAsignatura, codigoCorte);
     }
     
     private boolean isNotasPublicadas() {
@@ -252,27 +232,7 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
     }
     
     public boolean isNotaPublicada(int codigoEstudianteAsignatura, int codigoCorte) {
-        cadenaSql = "SELECT a.publicada "
-                + "FROM notas a "
-                + "WHERE a.codigo_estudiante_asignatura = " + codigoEstudianteAsignatura + " AND a.codigo_corte = " + codigoCorte;
-        GestionDB objConnect = null;
-        try {
-            objConnect = new GestionDB();
-            ResultSet rs = objConnect.consultar(cadenaSql);
-            if ( rs.next() )
-                return rs.getBoolean(1);
-        } catch (NamingException | SQLException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-        } finally {
-            try {
-                if (objConnect != null) {
-                    objConnect.desconectar();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-            }
-        }
-        return false;
+        return Enrutador.isNotaPublicada(codigoEstudianteAsignatura, codigoCorte);
     }
     
     private void publicarNotas() {

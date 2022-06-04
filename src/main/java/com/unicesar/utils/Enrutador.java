@@ -5,8 +5,19 @@ import com.unicesar.beans.Asignatura;
 import com.unicesar.beans.Corte;
 import com.unicesar.beans.Nota;
 import com.unicesar.beans.NotaDatos;
+import com.unicesar.beans.createNotes;
 import com.unicesar.beans.Usuario;
+import com.unicesar.views.LoginView;
+import io.aexp.nodes.graphql.Argument;
+import io.aexp.nodes.graphql.Arguments;
+import io.aexp.nodes.graphql.GraphQLRequestEntity;
+import io.aexp.nodes.graphql.GraphQLTemplate;
+import io.aexp.nodes.graphql.InputObject;
+import io.aexp.nodes.graphql.Variable;
+import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -17,7 +28,7 @@ import javax.ws.rs.core.Response;
 public class Enrutador {
     
     
-    public static Usuario getVendedorById(String login, String password) {
+    public static Usuario getLogin(String login, String password) {
         Client client = ClientBuilder.newBuilder().build();
         WebTarget target = client.target(Settings.APIRESTNOTAS + "/usuarios");
         Response response = target
@@ -130,21 +141,81 @@ public class Enrutador {
     
     
     public static int agregarNota(NotaDatos notaDatos) {
-        System.out.println("Entró");
+        try {
+            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+            
+            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+                .url(Settings.ENDPOINTGRAPHQL)
+                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
+                .request("mutation{createNotes(note: {"
+                            + "codigoEstudianteAsignatura: " + notaDatos.getCodigoEstudianteAsignatura() + "," 
+                            + "codigoCorte: " + notaDatos.getCodigoCorte() + "," 
+                            + "nota: " + notaDatos.getNota() 
+                    + "})}")
+                .build();
+            return graphQLTemplate.mutate(requestEntity, createNotes.class).getResponse().getCreateNotes();
+
+        } catch (IOException ex) {
+            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
+    
+//    public static int agregarNota(NotaDatos notaDatos) {
+//        System.out.println("Entró");
+//        Client client = ClientBuilder.newBuilder().build();
+//        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas");
+//        Response response = target
+//                .request()
+//                .post(Entity.entity(notaDatos, "application/json"));
+//        System.out.println(response);
+//        if (response.getStatus() != 200) {
+//            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+//        }
+//
+//        int respuesta = response.readEntity(Integer.class);
+//        response.close();
+//        client.close();
+//        return respuesta;
+//    }
+    
+    public static boolean isNotaAlmacenada(int codigoEstudianteAsignatura, int codigoCorte) {
         Client client = ClientBuilder.newBuilder().build();
-        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas");
+        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/almacenada");
         Response response = target
+                .queryParam("codigoEstudianteAsignatura", codigoEstudianteAsignatura)
+                .queryParam("codigoCorte", codigoCorte)
                 .request()
-                .post(Entity.entity(notaDatos, "application/json"));
-        System.out.println(response);
+                .get();
+
         if (response.getStatus() != 200) {
             throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
         }
 
-        int respuesta = response.readEntity(Integer.class);
+        boolean retorno = response.readEntity(Boolean.class);
         response.close();
         client.close();
-        return respuesta;
+        return retorno;
+    }
+    
+    
+    public static boolean isNotaPublicada(int codigoEstudianteAsignatura, int codigoCorte) {
+        Client client = ClientBuilder.newBuilder().build();
+        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/publicada");
+        Response response = target
+                .queryParam("codigoEstudianteAsignatura", codigoEstudianteAsignatura)
+                .queryParam("codigoCorte", codigoCorte)
+                .request()
+                .get();
+
+        if (response.getStatus() != 200) {
+            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        }
+
+        boolean retorno = response.readEntity(Boolean.class);
+        response.close();
+        client.close();
+        return retorno;
     }
     
     

@@ -2,6 +2,7 @@
 package com.unicesar.utils;
 
 import com.unicesar.beans.Asignatura;
+import com.unicesar.beans.AsignaturaGraphql;
 import com.unicesar.beans.DatosFilasTablas;
 import com.unicesar.businesslogic.GestionDB;
 import com.unicesar.businesslogic.GestionDBException;
@@ -41,6 +42,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -55,6 +58,12 @@ import java.util.regex.Pattern;
 import javax.naming.NamingException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.vaadin.teemu.switchui.Switch;
 import org.vaadin.ui.NumberField;
 
@@ -971,20 +980,26 @@ public class SeveralProcesses {
     }
     
     
-    public static GraphQLResponseEntity<Asignatura> callGraphQLService(String url, String query) throws IOException {
+    public static GraphQLResponseEntity<AsignaturaGraphql> callGraphQLService(String url, String query) throws IOException {
         GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
-
-//        GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
-//                .url(StringUtils.join(url, "?query=", query))
-//                .request(Asignatura.class)
-//                .build();
 
         GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
                 .url(url)
                 .request(query)
                 .build();
 
-//        return graphQLTemplate.query(requestEntity, Asignatura.class);
-        return graphQLTemplate.query(requestEntity, String.class);
+
+        return graphQLTemplate.query(requestEntity, AsignaturaGraphql.class);
+    }
+    
+    
+    public static HttpResponse callGraphQLService1(String url, String query) throws URISyntaxException, IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpPost request = new HttpPost(url);
+        URI uri = new URIBuilder(request.getURI())
+                .addParameter("createNotes", query)
+                .build();
+        request.setURI(uri);
+        return client.execute(request);
     }
 }

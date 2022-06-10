@@ -2,6 +2,7 @@
 package com.unicesar.beans;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  *
@@ -15,13 +16,13 @@ public class Email {
     private String emailDestino;
     private String emailAsunto;
     private String emailCuerpo;
-    private Date fecha;
+    private Timestamp fecha;
     
     public Email() {
     }
 
     public Email(int codigoEmail, int codigoEstudianteAsignatura, String emailOrigen, String emailOrigenPassword,
-            String emailDestino, String emailAsunto, String emailCuerpo, Date fecha) {
+            String emailDestino, String emailAsunto, String emailCuerpo, Timestamp fecha) {
         this.codigoEmail = codigoEmail;
         this.codigoEstudianteAsignatura = codigoEstudianteAsignatura;
         this.emailOrigen = emailOrigen;
@@ -33,7 +34,7 @@ public class Email {
     }
 
     public Email(int codigoEstudianteAsignatura, String emailOrigen, String emailOrigenPassword,
-            String emailDestino, String emailAsunto, String emailCuerpo, Date fecha) {
+            String emailDestino, String emailAsunto, String emailCuerpo, Timestamp fecha) {
         this.codigoEstudianteAsignatura = codigoEstudianteAsignatura;
         this.emailOrigen = emailOrigen;
         this.emailOrigenPassword = emailOrigenPassword;
@@ -99,11 +100,11 @@ public class Email {
         this.emailCuerpo = emailCuerpo;
     }
 
-    public Date getFecha() {
+    public Timestamp getFecha() {
         return fecha;
     }
 
-    public void setFecha(Date fecha) {
+    public void setFecha(Timestamp fecha) {
         this.fecha = fecha;
     }
 

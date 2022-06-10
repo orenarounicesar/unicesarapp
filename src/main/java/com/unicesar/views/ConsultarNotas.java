@@ -47,6 +47,7 @@ public class ConsultarNotas extends VerticalSplitPanel implements View {
         lblAtras.layoutLabel.addLayoutClickListener(e -> {
             UI.getCurrent().getNavigator().navigateTo(Views.MAIN);
         });
+        System.out.println(SeveralProcesses.getCodigoEstudianteEnSesion());
         lblNombreDocente = new Label("Estudiante: <strong>" + getNombreEstudiante(Integer.valueOf( SeveralProcesses.getCodigoEstudianteEnSesion().toString() )) + "</strong>", ContentMode.HTML);
         lblNombreDocente.setWidthUndefined();
         

@@ -25,7 +25,6 @@ public class GestionarNota extends Thread {
     
     @Override
     public void run() {
-        System.out.println(notaDatos);
         if ( notaDatos == null )
             Enrutador.deleteNota(codigoEstudianteAsignatura, codigoCorte);
         else

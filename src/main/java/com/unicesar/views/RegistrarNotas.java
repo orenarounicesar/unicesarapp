@@ -19,6 +19,8 @@ import com.unicesar.utils.Settings;
 import com.unicesar.utils.SeveralProcesses;
 import com.unicesar.utils.EnviarEmail;
 import com.unicesar.utils.Views;
+import com.unicesar.windows.Asistencias;
+import com.unicesar.windows.ListadoEmailsEnviados;
 import com.vaadin.data.Property;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
@@ -89,7 +91,7 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
         btnVerEmails.setStyleName("amarillo");
         btnVerEmails.setEnabled(true);
         btnVerEmails.addClickListener(e -> {
-            
+            UI.getCurrent().addWindow(new ListadoEmailsEnviados());
         });
         
         layoutCabecera = new GridLayout(4, 2);
@@ -112,6 +114,7 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
         tblAsignaturas = new TableWithFilterSplit("asignatura", "Listado de Asignaturas", true);
         tblAsignaturas.addContainerProperty("codigo", Object.class, null, "Codigo", null, Table.Align.CENTER);
         tblAsignaturas.addContainerProperty("asignatura", Object.class, null, "Asignatura", null, Table.Align.CENTER);
+        tblAsignaturas.addContainerProperty("asistencia", Button.class, null, "asistencia", null, Table.Align.CENTER);
         tblAsignaturas.setSizeFull();
         tblAsignaturas.setStyleName("tablaasignaturas");
         tblAsignaturas.layoutContent.setSizeFull();
@@ -133,7 +136,7 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
         
         layoutTablas = new HorizontalSplitPanel(tblAsignaturas.panel, tblEstudiantes.panel);
         layoutTablas.setSizeFull();
-        layoutTablas.setSplitPosition(500, Sizeable.Unit.PIXELS);
+        layoutTablas.setSplitPosition(600, Sizeable.Unit.PIXELS);
         
         addComponents(layoutCabecera, layoutTablas);
         setSizeFull();
@@ -162,10 +165,22 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
     
     private void cargarTblAsignaturas() {
         for ( Asignatura asignatura : Enrutador.getAsignaturasDocente((int) SeveralProcesses.getCodigoDocenteEnSesion()) ) {
+            Button btnAsistencia = new Button("Asistencia", FontAwesome.ASTERISK);
+            btnAsistencia.setStyleName("rojo");
+            btnAsistencia.addStyleName(ValoTheme.BUTTON_TINY);
+            btnAsistencia.addClickListener(new Button.ClickListener() {
+                private final int codigoAsignatura = asignatura.getCodigoAsignatura();
+                private final String nombreAsignatura = asignatura.getNombreAsignatura();
+                @Override
+                public void buttonClick(Button.ClickEvent event) {
+                    UI.getCurrent().addWindow(new Asistencias(codigoAsignatura, nombreAsignatura, codigoCorte));
+                }
+            });
             tblAsignaturas.addItem(
                 new Object[]{
                     asignatura.getCodigoAsignatura(),
-                    asignatura.getNombreAsignatura()
+                    asignatura.getNombreAsignatura(), 
+                    btnAsistencia
                 }, 
                 asignatura.getCodigoAsignatura()
             );

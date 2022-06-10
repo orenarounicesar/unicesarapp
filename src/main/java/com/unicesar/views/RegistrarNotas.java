@@ -271,7 +271,7 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
                             Settings.EMAILPASSWORD, 
                             getEmailEstuadiante(Integer.valueOf(itemId.toString())), 
                             "Publicación de Notas - Asignatura " + nombreAsignaturaSeleccionada, 
-                            "Buenas\n\n"
+                            "Buenas. "
                                 + "Se informa que las notas de la asignatura " + nombreAsignaturaSeleccionada + " para el " + nombreCorte + " fueron publicadas", 
                             null
                     )

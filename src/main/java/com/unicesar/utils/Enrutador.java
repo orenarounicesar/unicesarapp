@@ -13,13 +13,20 @@ import com.unicesar.beans.ResponseCrearAsistencia;
 import com.unicesar.beans.ResponseBoolean;
 import com.unicesar.beans.ResponseDeleteNota;
 import com.unicesar.beans.ResponseEliminarAsistencia;
+import com.unicesar.beans.ResponseEnviarEmail;
 import com.unicesar.beans.ResponseGetAsignaturaDocente;
 import com.unicesar.beans.ResponseGetCorte;
+import com.unicesar.beans.ResponseGetEmailEstudiante;
+import com.unicesar.beans.ResponseGetEmails;
 import com.unicesar.beans.ResponseGetEstudiante;
 import com.unicesar.beans.ResponseGetNombreDocente;
 import com.unicesar.beans.ResponseGetNotasAsignatura;
+import com.unicesar.beans.ResponseGetNotasEstudiante;
 import com.unicesar.beans.ResponseGetUsuario;
 import com.unicesar.beans.ResponseInt;
+import com.unicesar.beans.ResponseIsNotaAlmacenada;
+import com.unicesar.beans.ResponseIsNotaPublicada;
+import com.unicesar.beans.ResponsePublicarNota;
 import com.unicesar.beans.ResponseString;
 import com.unicesar.beans.Usuario;
 import com.unicesar.views.LoginView;
@@ -380,22 +387,24 @@ public class Enrutador {
 //    }
     
     public static boolean isNotaAlmacenada(int codigoEstudianteAsignatura, int codigoCorte) {
-        Client client = ClientBuilder.newBuilder().build();
-        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/almacenada");
-        Response response = target
-                .queryParam("codigoEstudianteAsignatura", codigoEstudianteAsignatura)
-                .queryParam("codigoCorte", codigoCorte)
-                .request()
-                .get();
+        try {
+            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+            
+            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+                .url(Settings.ENDPOINTGRAPHQL)
+                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
+                .request("query {\n" +
+                    "	isNotaAlmacenada(codigoEstudianteAsignatura:" + codigoEstudianteAsignatura + ", codigoCorte:" + codigoCorte + "){\n" +
+                    "        respuesta\n" +
+                    "	}\n" +
+                    " }")
+                .build();
+            return graphQLTemplate.query(requestEntity, ResponseIsNotaAlmacenada.class).getResponse().getIsNotaAlmacenada().isRespuesta();
 
-        if (response.getStatus() != 200) {
-            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        } catch (IOException ex) {
+            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        ResponseBoolean responseBoolean = response.readEntity(ResponseBoolean.class);
-        response.close();
-        client.close();
-        return responseBoolean.isRespuesta();
+        return false;
     }
     
 //    public static boolean isNotaAlmacenada(int codigoEstudianteAsignatura, int codigoCorte) {
@@ -419,110 +428,257 @@ public class Enrutador {
     
     
     public static boolean isNotaPublicada(int codigoEstudianteAsignatura, int codigoCorte) {
-        Client client = ClientBuilder.newBuilder().build();
-        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/publicada");
-        Response response = target
-                .queryParam("codigoEstudianteAsignatura", codigoEstudianteAsignatura)
-                .queryParam("codigoCorte", codigoCorte)
-                .request()
-                .get();
+        try {
+            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+            
+            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+                .url(Settings.ENDPOINTGRAPHQL)
+                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
+                .request("query {\n" +
+                    "	isNotaPublicada(codigoEstudianteAsignatura:" + codigoEstudianteAsignatura + ", codigoCorte:" + codigoCorte + "){\n" +
+                    "        respuesta\n" +
+                    "	}\n" +
+                    " }")
+                .build();
+            return graphQLTemplate.query(requestEntity, ResponseIsNotaPublicada.class).getResponse().getIsNotaPublicada().isRespuesta();
 
-        if (response.getStatus() != 200) {
-            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        } catch (IOException ex) {
+            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        ResponseBoolean responseBoolean = response.readEntity(ResponseBoolean.class);
-        response.close();
-        client.close();
-        return responseBoolean.isRespuesta();
+        return false;
     }
+    
+//    public static boolean isNotaPublicada(int codigoEstudianteAsignatura, int codigoCorte) {
+//        Client client = ClientBuilder.newBuilder().build();
+//        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/publicada");
+//        Response response = target
+//                .queryParam("codigoEstudianteAsignatura", codigoEstudianteAsignatura)
+//                .queryParam("codigoCorte", codigoCorte)
+//                .request()
+//                .get();
+//
+//        if (response.getStatus() != 200) {
+//            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+//        }
+//
+//        ResponseBoolean responseBoolean = response.readEntity(ResponseBoolean.class);
+//        response.close();
+//        client.close();
+//        return responseBoolean.isRespuesta();
+//    }
     
     public static int publicarNota(NotaDatos notaDatos) {
-        Client client = ClientBuilder.newBuilder().build();
-        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/publicar");
-        Response response = target
-                .request()
-                .put(Entity.entity(notaDatos, "application/json"));
+        try {
+            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+            
+            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+                .url(Settings.ENDPOINTGRAPHQL)
+                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
+                .request("mutation{publicarNota(note: {"
+                            + "codigoEstudianteAsignatura: " + notaDatos.getCodigoEstudianteAsignatura() + "," 
+                            + "codigoCorte: " + notaDatos.getCodigoCorte() + "," 
+                            + "nota: " + notaDatos.getNota() 
+                    + "}){"
+                            + "codigoRespuesta"
+                            + "}"
+                            + "}")
+                .build();
+            return graphQLTemplate.mutate(requestEntity, ResponsePublicarNota.class).getResponse().getPublicarNota().getCodigoRespuesta();
 
-        if (response.getStatus() != 200) {
-            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        } catch (IOException ex) {
+            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        ResponseInt responseInt = response.readEntity(ResponseInt.class);
-        response.close();
-        client.close();
-        return responseInt.getCodigoRespuesta();
+        return 0;
     }
+    
+//    public static int publicarNota(NotaDatos notaDatos) {
+//        Client client = ClientBuilder.newBuilder().build();
+//        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/publicar");
+//        Response response = target
+//                .request()
+//                .put(Entity.entity(notaDatos, "application/json"));
+//
+//        if (response.getStatus() != 200) {
+//            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+//        }
+//
+//        ResponseInt responseInt = response.readEntity(ResponseInt.class);
+//        response.close();
+//        client.close();
+//        return responseInt.getCodigoRespuesta();
+//    }
     
     public static String getEmailEstudiante(int  codigoEstudianteAsignatura) {
-        Client client = ClientBuilder.newBuilder().build();
-        WebTarget target = client.target(Settings.APIRESTNOTAS + "/estudiantes/email");
-        Response response = target
-                .queryParam("codigoEstudianteAsignatura", codigoEstudianteAsignatura)
-                .request()
-                .get();
+        try {
+            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+            
+            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+                .url(Settings.ENDPOINTGRAPHQL)
+                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
+                .request(" query {\n" +
+                    "	getEmailEstudiante(codigoEstudianteAsignatura:" + codigoEstudianteAsignatura + "){\n" +
+                    "        respuesta\n" +
+                    "	}\n" +
+                    " }")
+                .build();
+            return graphQLTemplate.query(requestEntity, ResponseGetEmailEstudiante.class).getResponse().getGetEmailEstudiante().getRespuesta();
 
-        if (response.getStatus() != 200) {
-            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        } catch (IOException ex) {
+            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        ResponseString responseString = response.readEntity(ResponseString.class);
-        response.close();
-        client.close();
-        return responseString.getRespuesta();
+        return null;
     }
+    
+//    public static String getEmailEstudiante(int  codigoEstudianteAsignatura) {
+//        Client client = ClientBuilder.newBuilder().build();
+//        WebTarget target = client.target(Settings.APIRESTNOTAS + "/estudiantes/email");
+//        Response response = target
+//                .queryParam("codigoEstudianteAsignatura", codigoEstudianteAsignatura)
+//                .request()
+//                .get();
+//
+//        if (response.getStatus() != 200) {
+//            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+//        }
+//
+//        ResponseString responseString = response.readEntity(ResponseString.class);
+//        response.close();
+//        client.close();
+//        return responseString.getRespuesta();
+//    }
     
     public static List<NotaEstudiante> getNotasEstudiante(int codigoEstudiante) {
-        Client client = ClientBuilder.newBuilder().build();
-        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/notaestudiante");
-        Response response = target
-                .queryParam("codigoEstudiante", codigoEstudiante)
-                .request()
-                .get();
+        try {
+            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+            
+            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+                .url(Settings.ENDPOINTGRAPHQL)
+                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
+                .request("query {\n" +
+                    "	getNotasEstudiante(codigoEstudiante:" + codigoEstudiante + "){\n" +
+                    "        codigoEstudianteAsignatura, \n" +
+                    "        nombreCorte,\n" +
+                    "        codigoAsignatura,\n" +
+                    "        nombreAsignatura,\n" +
+                    "        nota\n" +
+                    "	}\n" +
+                    " }")
+                .build();
+            return graphQLTemplate.query(requestEntity, ResponseGetNotasEstudiante.class).getResponse().getGetNotasEstudiante();
 
-        if (response.getStatus() != 200) {
-            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        } catch (IOException ex) {
+            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        List<NotaEstudiante> notasEstudiante = response.readEntity(new GenericType<List<NotaEstudiante>>(){});
-        response.close();
-        client.close();
-        return notasEstudiante;
+        return null;
     }
+    
+//    public static List<NotaEstudiante> getNotasEstudiante(int codigoEstudiante) {
+//        Client client = ClientBuilder.newBuilder().build();
+//        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/notaestudiante");
+//        Response response = target
+//                .queryParam("codigoEstudiante", codigoEstudiante)
+//                .request()
+//                .get();
+//
+//        if (response.getStatus() != 200) {
+//            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+//        }
+//
+//        List<NotaEstudiante> notasEstudiante = response.readEntity(new GenericType<List<NotaEstudiante>>(){});
+//        response.close();
+//        client.close();
+//        return notasEstudiante;
+//    }
     
     public static String enviarEmail(Email email) {
-        Client client = ClientBuilder.newBuilder().build();
-        WebTarget target = client.target(Settings.APIRESTNOTIFICACIONES + "/notificaciones");
-        Response response = target
-                .request()
-                .post(Entity.entity(email, "application/json"));
-        
-        if (response.getStatus() != 200) {
-            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
-        }
+        try {
+            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+            
+            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+                .url(Settings.ENDPOINTGRAPHQL)
+                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
+                .request("mutation {\n" +
+                    "	enviarEmail(email: { \n" +
+                    "        codigoEstudianteAsignatura: " + email.getCodigoEstudianteAsignatura() + ",\n" +
+                    "        emailOrigen: \"" + email.getEmailOrigen() + "\",\n" +
+                    "        emailOrigenPassword: \"" + email.getEmailOrigenPassword() + "\",\n" +
+                    "        emailDestino: \"" + email.getEmailDestino() + "\",\n" +
+                    "        emailAsunto: \"" + email.getEmailAsunto() + "\",\n" +
+                    "        emailCuerpo: \"" + email.getEmailCuerpo() + "\"\n" +
+                    "	}){\n" +
+                    "        respuesta\n" +
+                    "    }\n" +
+                    " }")
+                .build();
+            return graphQLTemplate.mutate(requestEntity, ResponseEnviarEmail.class).getResponse().getEnviarEmail().getRespuesta();
 
-        ResponseString responseString = response.readEntity(ResponseString.class);
-        response.close();
-        client.close();
-        return responseString.getRespuesta();
+        } catch (IOException ex) {
+            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
     
+//    public static String enviarEmail(Email email) {
+//        Client client = ClientBuilder.newBuilder().build();
+//        WebTarget target = client.target(Settings.APIRESTNOTIFICACIONES + "/notificaciones");
+//        Response response = target
+//                .request()
+//                .post(Entity.entity(email, "application/json"));
+//        
+//        if (response.getStatus() != 200) {
+//            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+//        }
+//
+//        ResponseString responseString = response.readEntity(ResponseString.class);
+//        response.close();
+//        client.close();
+//        return responseString.getRespuesta();
+//    }
+    
     public static List<Email> getEmails() {
-        Client client = ClientBuilder.newBuilder().build();
-        WebTarget target = client.target(Settings.APIRESTNOTIFICACIONES + "/notificaciones");
-        Response response = target
-                .request()
-                .get();
+        try {
+            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+            
+            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+                .url(Settings.ENDPOINTGRAPHQL)
+                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
+                .request("query {\n" +
+                    "	getEmails{\n" +
+                    "        codigoEmail, \n" +
+                    "        codigoEstudianteAsignatura,\n" +
+                    "        emailOrigen,\n" +
+                    "        emailOrigenPassword,\n" +
+                    "        emailDestino,\n" +
+                    "        emailAsunto,\n" +
+                    "        emailCuerpo,\n" +
+                    "        fecha\n" +
+                    "	}\n" +
+                    " }")
+                .build();
+            return graphQLTemplate.query(requestEntity, ResponseGetEmails.class).getResponse().getGetEmails();
 
-        if (response.getStatus() != 200) {
-            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        } catch (IOException ex) {
+            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        List<Email> emails = response.readEntity(new GenericType<List<Email>>(){});
-        response.close();
-        client.close();
-        return emails;
+        return null;
     }
+    
+//    public static List<Email> getEmails() {
+//        Client client = ClientBuilder.newBuilder().build();
+//        WebTarget target = client.target(Settings.APIRESTNOTIFICACIONES + "/notificaciones");
+//        Response response = target
+//                .request()
+//                .get();
+//
+//        if (response.getStatus() != 200) {
+//            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+//        }
+//
+//        List<Email> emails = response.readEntity(new GenericType<List<Email>>(){});
+//        response.close();
+//        client.close();
+//        return emails;
+//    }
 
     public static int crearAsistencia(int codigoEstudianteAsignatura, int codigoAsignatura) {
         try {

@@ -13,7 +13,7 @@ public class NotaDatos {
 
     public NotaDatos() {
     }
-    
+
     public NotaDatos(int codigoEstudianteAsignatura, int codigoCorte, float nota) {
         this.codigoEstudianteAsignatura = codigoEstudianteAsignatura;
         this.codigoCorte = codigoCorte;
@@ -46,8 +46,8 @@ public class NotaDatos {
 
     @Override
     public String toString() {
-        return "NotaDatos [codigoCorte=" + codigoCorte + ", codigoEstudianteAsignatura=" + codigoEstudianteAsignatura
-                + ", nota=" + nota + "]";
+        return "NotaDatos{" + "codigoEstudianteAsignatura=" + codigoEstudianteAsignatura + ", codigoCorte=" + codigoCorte + ", nota=" + nota + '}';
     }
+    
     
 }

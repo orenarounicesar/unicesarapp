@@ -3,8 +3,14 @@ package com.unicesar.utils;
 
 import com.unicesar.beans.Asignatura;
 import com.unicesar.beans.Corte;
+import com.unicesar.beans.Email;
+import com.unicesar.beans.Estudiante;
 import com.unicesar.beans.Nota;
 import com.unicesar.beans.NotaDatos;
+import com.unicesar.beans.NotaEstudiante;
+import com.unicesar.beans.ResponseBoolean;
+import com.unicesar.beans.ResponseInt;
+import com.unicesar.beans.ResponseString;
 import com.unicesar.beans.createNotes;
 import com.unicesar.beans.Usuario;
 import com.unicesar.views.LoginView;
@@ -47,6 +53,24 @@ public class Enrutador {
         return usuario;
     }
     
+    public static Estudiante getEstudiante(int codigoEstudiante) {
+        Client client = ClientBuilder.newBuilder().build();
+        WebTarget target = client.target(Settings.APIRESTNOTAS + "/estudiantes");
+        Response response = target
+                .queryParam("codigoEstudiante", codigoEstudiante)
+                .request()
+                .get();
+
+        if (response.getStatus() != 200) {
+            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        }
+
+        Estudiante estudiante = response.readEntity(Estudiante.class);
+        response.close();
+        client.close();
+        return estudiante;
+    }
+    
     public static String getNombreDocente(int codigoDocente) {
         Client client = ClientBuilder.newBuilder().build();
         WebTarget target = client.target(Settings.APIRESTNOTAS + "/docentes");
@@ -59,10 +83,10 @@ public class Enrutador {
             throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
         }
 
-        String nombreDocente = response.readEntity(String.class);
+        ResponseString responseString = response.readEntity(ResponseString.class);
         response.close();
         client.close();
-        return nombreDocente;
+        return responseString.getRespuesta();
     }
     
     public static Corte getCorte(int codigoCorte) {
@@ -133,51 +157,50 @@ public class Enrutador {
             throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
         }
 
-        int respuesta = response.readEntity(Integer.class);
+        ResponseInt reponseInt = response.readEntity(ResponseInt.class);
         response.close();
         client.close();
-        return respuesta;
+        return reponseInt.getCodigoRespuesta();
     }
     
-    
-    public static int agregarNota(NotaDatos notaDatos) {
-        try {
-            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
-            
-            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
-                .url(Settings.ENDPOINTGRAPHQL)
-                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
-                .request("mutation{createNotes(note: {"
-                            + "codigoEstudianteAsignatura: " + notaDatos.getCodigoEstudianteAsignatura() + "," 
-                            + "codigoCorte: " + notaDatos.getCodigoCorte() + "," 
-                            + "nota: " + notaDatos.getNota() 
-                    + "})}")
-                .build();
-            return graphQLTemplate.mutate(requestEntity, createNotes.class).getResponse().getCreateNotes();
-
-        } catch (IOException ex) {
-            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return 0;
-    }
     
 //    public static int agregarNota(NotaDatos notaDatos) {
-//        System.out.println("Entró");
-//        Client client = ClientBuilder.newBuilder().build();
-//        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas");
-//        Response response = target
-//                .request()
-//                .post(Entity.entity(notaDatos, "application/json"));
-//        System.out.println(response);
-//        if (response.getStatus() != 200) {
-//            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
-//        }
+//        try {
+//            GraphQLTemplate graphQLTemplate = new GraphQLTemplate();
+//            
+//            GraphQLRequestEntity requestEntity = GraphQLRequestEntity.Builder()
+//                .url(Settings.ENDPOINTGRAPHQL)
+//                .requestMethod(GraphQLTemplate.GraphQLMethod.MUTATE)
+//                .request("mutation{createNotes(note: {"
+//                            + "codigoEstudianteAsignatura: " + notaDatos.getCodigoEstudianteAsignatura() + "," 
+//                            + "codigoCorte: " + notaDatos.getCodigoCorte() + "," 
+//                            + "nota: " + notaDatos.getNota() 
+//                    + "})}")
+//                .build();
+//            return graphQLTemplate.mutate(requestEntity, createNotes.class).getResponse().getCreateNotes();
 //
-//        int respuesta = response.readEntity(Integer.class);
-//        response.close();
-//        client.close();
-//        return respuesta;
+//        } catch (IOException ex) {
+//            Logger.getLogger(LoginView.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return 0;
 //    }
+    
+    public static int agregarNota(NotaDatos notaDatos) {
+        Client client = ClientBuilder.newBuilder().build();
+        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas");
+        Response response = target
+                .request()
+                .post(Entity.entity(notaDatos, "application/json"));
+        System.out.println(response);
+        if (response.getStatus() != 200) {
+            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        }
+
+        ResponseInt responseInt = response.readEntity(ResponseInt.class);
+        response.close();
+        client.close();
+        return responseInt.getCodigoRespuesta();
+    }
     
     public static boolean isNotaAlmacenada(int codigoEstudianteAsignatura, int codigoCorte) {
         Client client = ClientBuilder.newBuilder().build();
@@ -192,10 +215,10 @@ public class Enrutador {
             throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
         }
 
-        boolean retorno = response.readEntity(Boolean.class);
+        ResponseBoolean responseBoolean = response.readEntity(ResponseBoolean.class);
         response.close();
         client.close();
-        return retorno;
+        return responseBoolean.isRespuesta();
     }
     
     
@@ -212,11 +235,79 @@ public class Enrutador {
             throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
         }
 
-        boolean retorno = response.readEntity(Boolean.class);
+        ResponseBoolean responseBoolean = response.readEntity(ResponseBoolean.class);
         response.close();
         client.close();
-        return retorno;
+        return responseBoolean.isRespuesta();
     }
     
+    public static int publicarNota(NotaDatos notaDatos) {
+        Client client = ClientBuilder.newBuilder().build();
+        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/publicar");
+        Response response = target
+                .request()
+                .put(Entity.entity(notaDatos, "application/json"));
+
+        if (response.getStatus() != 200) {
+            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        }
+
+        ResponseInt responseInt = response.readEntity(ResponseInt.class);
+        response.close();
+        client.close();
+        return responseInt.getCodigoRespuesta();
+    }
     
+    public static String getEmailEstudiante(int  codigoEstudianteAsignatura) {
+        Client client = ClientBuilder.newBuilder().build();
+        WebTarget target = client.target(Settings.APIRESTNOTAS + "/estudiantes/email");
+        Response response = target
+                .queryParam("codigoEstudianteAsignatura", codigoEstudianteAsignatura)
+                .request()
+                .get();
+
+        if (response.getStatus() != 200) {
+            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        }
+
+        ResponseString responseString = response.readEntity(ResponseString.class);
+        response.close();
+        client.close();
+        return responseString.getRespuesta();
+    }
+    
+    public static List<NotaEstudiante> getNotasEstudiante(int codigoEstudiante) {
+        Client client = ClientBuilder.newBuilder().build();
+        WebTarget target = client.target(Settings.APIRESTNOTAS + "/notas/notaestudiante");
+        Response response = target
+                .queryParam("codigoEstudiante", codigoEstudiante)
+                .request()
+                .get();
+
+        if (response.getStatus() != 200) {
+            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        }
+
+        List<NotaEstudiante> notasEstudiante = response.readEntity(new GenericType<List<NotaEstudiante>>(){});
+        response.close();
+        client.close();
+        return notasEstudiante;
+    }
+    
+    public static String enviarEmail(Email email) {
+        Client client = ClientBuilder.newBuilder().build();
+        WebTarget target = client.target(Settings.APIRESTNOTIFICACIONES + "/notificaciones");
+        Response response = target
+                .request()
+                .post(Entity.entity(email, "application/json"));
+        
+        if (response.getStatus() != 200) {
+            throw new RuntimeException("Failed : HTTP error code : " + response.getStatus() + " - Info: " + response.getStatusInfo());
+        }
+
+        ResponseString responseString = response.readEntity(ResponseString.class);
+        response.close();
+        client.close();
+        return responseString.getRespuesta();
+    }
 }

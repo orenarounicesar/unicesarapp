@@ -5,9 +5,10 @@
  */
 package com.unicesar.views;
 
-import com.unicesar.businesslogic.GestionDB;
+import com.unicesar.beans.NotaEstudiante;
 import com.unicesar.components.LabelClick;
 import com.unicesar.components.TableWithFilterSplit;
+import com.unicesar.utils.Enrutador;
 import com.unicesar.utils.SeveralProcesses;
 import com.unicesar.utils.Views;
 import com.vaadin.icons.VaadinIcons;
@@ -22,11 +23,6 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.naming.NamingException;
 
 /**
  *
@@ -40,8 +36,6 @@ public class ConsultarNotas extends VerticalSplitPanel implements View {
     private GridLayout layoutCabecera;
     private TableWithFilterSplit tblAsignaturas;
     
-    private String cadenaSql;
-    
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
         lblTitulo = new Label("Consulta de Notas");
@@ -53,7 +47,7 @@ public class ConsultarNotas extends VerticalSplitPanel implements View {
         lblAtras.layoutLabel.addLayoutClickListener(e -> {
             UI.getCurrent().getNavigator().navigateTo(Views.MAIN);
         });
-        lblNombreDocente = new Label("Estudiante: <strong>" + getNombreEstudiante(SeveralProcesses.getCodigoEstudianteEnSesion()) + "</strong>", ContentMode.HTML);
+        lblNombreDocente = new Label("Estudiante: <strong>" + getNombreEstudiante(Integer.valueOf( SeveralProcesses.getCodigoEstudianteEnSesion().toString() )) + "</strong>", ContentMode.HTML);
         lblNombreDocente.setWidthUndefined();
         
         layoutCabecera = new GridLayout(3, 1);
@@ -89,68 +83,23 @@ public class ConsultarNotas extends VerticalSplitPanel implements View {
         cargarTblAsignaturas();
     }
     
-    private String getNombreEstudiante(Object codigoDocente) {
-        cadenaSql = "SELECT "
-                + "CONCAT_WS(' ',a.nombre1, a.nombre2, a.apellido1, a.apellido2) AS nombre_docente "
-            + "FROM datos_personales a "
-            + "INNER JOIN docentes b ON b.codigo_dato_personal = a.codigo_dato_personal AND b.codigo_docente = " + codigoDocente
-            ;
-        GestionDB objConnect = null;
-        try {
-            objConnect = new GestionDB();
-            ResultSet rs = objConnect.consultar(cadenaSql);
-            if ( rs.next() ) {
-                return rs.getString(1);
-            }
-        } catch (NamingException | SQLException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-        } finally {
-            try {
-                if (objConnect != null) {
-                    objConnect.desconectar();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-            }
-        }
-        return null;
+    private String getNombreEstudiante(int codigoEstudiante) {
+        return Enrutador.getEstudiante(codigoEstudiante).getNombreEstudiante();
     }
     
     
     
     private void cargarTblAsignaturas() {
-        cadenaSql = "SELECT "
-                + "c.codigo_estudiante_asignatura, e.nombre_corte, a.codigo_asignatura, a.nombre_asignatura, d.nota "
-            + "FROM asignaturas a "
-            + "INNER JOIN docentes_asignaturas b ON b.codigo_asignatura = a.codigo_asignatura "
-            + "INNER JOIN estudiantes_asignaturas c ON c.codigo_asignatura = a.codigo_asignatura AND c.codigo_estudiante = " + SeveralProcesses.getCodigoEstudianteEnSesion() + " "
-            + "INNER JOIN notas d ON d.codigo_estudiante_asignatura = c.codigo_estudiante_asignatura AND d.publicada = 1 "
-            + "INNER JOIN cortes e ON e.codigo_corte = d.codigo_corte";
-        GestionDB objConnect = null;
-        try {
-            objConnect = new GestionDB();
-            ResultSet rs = objConnect.consultar(cadenaSql);
-            while ( rs.next() ) {
+        for ( NotaEstudiante notaEstudiante : Enrutador.getNotasEstudiante( Integer.valueOf(SeveralProcesses.getCodigoEstudianteEnSesion().toString()) ) ){
                 tblAsignaturas.addItem(
                         new Object[]{
-                            rs.getString("nombre_corte"),
-                            rs.getInt("codigo_asignatura"),
-                            rs.getString("nombre_asignatura"),
-                            rs.getString("nota")
+                            notaEstudiante.getNombreCorte(),
+                            notaEstudiante.getCodigoAsignatura(),
+                            notaEstudiante.getNombreAsignatura(),
+                            notaEstudiante.getNota()
                         }, 
-                        rs.getInt("codigo_estudiante_asignatura")
+                        notaEstudiante.getCodigoEstudianteAsignatura()
                 );
-            }
-        } catch (NamingException | SQLException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-        } finally {
-            try {
-                if (objConnect != null) {
-                    objConnect.desconectar();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-            }
         }
     }
     

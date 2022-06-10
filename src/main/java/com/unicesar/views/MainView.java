@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.unicesar.views;
 
 import com.unicesar.components.LabelClick;
@@ -62,13 +58,13 @@ public class MainView extends VerticalSplitPanel implements View {
         btnRegistrar.setWidth("450px");
         btnRegistrar.setHeight("450px");
         btnRegistrar.setStyleName(ValoTheme.BUTTON_LINK);
-        btnRegistrar.setEnabled(SeveralProcesses.getCodigoDocenteEnSesion() != null);
+        btnRegistrar.setEnabled(!SeveralProcesses.getCodigoDocenteEnSesion().equals(0));
         
         btnConsultar = new Button(new ThemeResource("images/consultar.jpg"));
         btnConsultar.setWidth("450px");
         btnConsultar.setHeight("450px");
         btnConsultar.setStyleName(ValoTheme.BUTTON_LINK);
-        btnConsultar.setEnabled(SeveralProcesses.getCodigoEstudianteEnSesion() != null);
+        btnConsultar.setEnabled(!SeveralProcesses.getCodigoEstudianteEnSesion().equals(0));
         
         layoutImages = new HorizontalLayout(btnRegistrar, btnConsultar);
         layoutImages.setComponentAlignment(btnRegistrar, Alignment.MIDDLE_CENTER);

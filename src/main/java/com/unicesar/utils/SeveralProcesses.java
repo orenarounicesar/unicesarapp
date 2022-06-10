@@ -1,12 +1,8 @@
 
 package com.unicesar.utils;
 
-import com.unicesar.beans.Asignatura;
 import com.unicesar.beans.AsignaturaGraphql;
 import com.unicesar.beans.DatosFilasTablas;
-import com.unicesar.businesslogic.GestionDB;
-import com.unicesar.businesslogic.GestionDBException;
-import com.unicesar.businesslogic.Notifications;
 import com.unicesar.components.ComboBoxCustom;
 import com.unicesar.components.ComponentClass;
 import com.unicesar.components.LabelClick;
@@ -24,6 +20,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
@@ -44,9 +41,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -55,12 +49,9 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import javax.naming.NamingException;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -77,14 +68,6 @@ public class SeveralProcesses {
         }
         return false;
     }
-    
-    
-    public static void confirmarSentencia (String mensaje)throws GestionDBException{
-        if (!mensaje.substring(0, 4).equals("true")) {
-            throw new GestionDBException(mensaje);            
-        }
-    }
-    
     
     public static void setGeneralComponentStatus(ComponentContainer componentContainer, Boolean componentStatus) {
         ArrayList<ComponentContainer> listComponentContainer = new ArrayList<>();
@@ -435,50 +418,6 @@ public class SeveralProcesses {
         return "";
     }
     
-    public static Timestamp getFechaActualServidor() {
-        Timestamp retorno = null;
-        GestionDB objConnect = null;
-        try {
-            objConnect = new GestionDB();
-            ResultSet rs = objConnect.consultar("SELECT NOW() AS fecha");
-            if (rs.next()) {
-                retorno = rs.getTimestamp("fecha");
-            }
-        } catch (SQLException | NamingException ex) {
-            Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, getSessionUser(), ex);
-        } finally {
-            try {
-                if (objConnect != null)
-                    objConnect.desconectar();
-            } catch (SQLException ex) {
-                Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, "Cerrando Conexión - " + getSessionUser(), ex);
-            }
-        }
-        return retorno;
-    }
-    
-//    public static Date getFechaActualSinHoraServidor() {
-//        Date retorno = null;
-//        GestionDB objConnect = null;
-//        try {
-//            objConnect = new GestionDB();
-//            ResultSet rs = objConnect.consultar("SELECT CURDATE() AS fecha");
-//            if (rs.next()) {
-//                retorno = rs.getDate("fecha");
-//            }
-//        } catch (SQLException | NamingException ex) {
-//            Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, getSessionUser(), ex);
-//        } finally {
-//            try {
-//                if (objConnect != null)
-//                    objConnect.desconectar();
-//            } catch (SQLException ex) {
-//                Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, "Cerrando Conexión - " + getSessionUser(), ex);
-//            }
-//        }
-//        return retorno;
-//    }
-    
     public static String getSessionUser() {
         return UI.getCurrent().getSession().getAttribute(VariablesSesion.LOGIN).toString();
     }
@@ -652,175 +591,6 @@ public class SeveralProcesses {
     }
     
     
-    public static void addItemsComboDefault(ComboBox combo, String cadenaSql) {
-        if (!cadenaSql.isEmpty()) {
-            Integer contador = 0;
-            Integer valor = 0;
-            combo.removeAllItems();
-            GestionDB objConnect = null;
-            try {
-                objConnect = new GestionDB();
-                ResultSet rsCbb = objConnect.consultar(cadenaSql);
-                if (rsCbb.next()) {
-                    combo.addItem(rsCbb.getInt(1));
-                    combo.setItemCaption(rsCbb.getInt(1), rsCbb.getString(2));
-                    contador++;
-                    valor = rsCbb.getInt(1);
-                    while(rsCbb.next()){
-                        combo.addItem(rsCbb.getInt(1));
-                        combo.setItemCaption(rsCbb.getInt(1), rsCbb.getString(2));
-                        contador++;
-                        valor = rsCbb.getInt(1);
-                    }
-                }
-                if (contador == 1)
-                    combo.setValue(valor);
-            } catch (SQLException | NullPointerException | NamingException ex) {
-                Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-                Notifications.getError(ex.getMessage());
-            } finally {
-                try {
-                    if (objConnect != null)
-                        objConnect.desconectar();
-                } catch (SQLException ex) {
-                    Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-                    Notifications.getError(ex.getMessage());
-                }   
-            }
-        }
-    }
-    
-    public static void addTextItemsComboDefault(ComboBox combo, String cadenaSql) {
-        if (!cadenaSql.isEmpty()) {
-            Integer contador = 0;
-            String valor = null;
-            combo.removeAllItems();
-            GestionDB objConnect = null;
-            try {
-                objConnect = new GestionDB();
-                ResultSet rsCbb = objConnect.consultar(cadenaSql);
-                if (rsCbb.next()) {
-                    combo.addItem(rsCbb.getString(1));
-                    combo.setItemCaption(rsCbb.getString(1), rsCbb.getString(2));
-                    contador++;
-                    valor = rsCbb.getString(1);
-                    while(rsCbb.next()){
-                        combo.addItem(rsCbb.getString(1));
-                        combo.setItemCaption(rsCbb.getString(1), rsCbb.getString(2));
-                        contador++;
-                        valor = rsCbb.getString(1);
-                    }
-                }
-                if (contador == 1)
-                    combo.setValue(valor);
-            } catch (SQLException | NullPointerException | NamingException ex) {
-                Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-                Notifications.getError(ex.getMessage());
-            } finally {
-                try {
-                    if (objConnect != null)
-                        objConnect.desconectar();
-                } catch (SQLException ex) {
-                    Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-                    Notifications.getError(ex.getMessage());
-                }
-            }
-        }
-    }
-    
-    public static void addTextItemsComboNotDefault(ComboBox combo, String cadenaSql) {
-        if (!cadenaSql.isEmpty()) {
-            String valor = null;
-            combo.removeAllItems();
-            GestionDB objConnect = null;
-            try {
-                objConnect = new GestionDB();
-                ResultSet rsCbb = objConnect.consultar(cadenaSql);
-                if (rsCbb.next()) {
-                    combo.addItem(rsCbb.getString(1));
-                    combo.setItemCaption(rsCbb.getString(1), rsCbb.getString(2));
-                    valor = rsCbb.getString(1);
-                    while(rsCbb.next()){
-                        combo.addItem(rsCbb.getString(1));
-                        combo.setItemCaption(rsCbb.getString(1), rsCbb.getString(2));
-                        valor = rsCbb.getString(1);
-                    }
-                }     
-            } catch (SQLException | NullPointerException | NamingException ex) {
-                Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-                Notifications.getError(ex.getMessage());
-            } finally {
-                try {
-                    if (objConnect != null)
-                        objConnect.desconectar();
-                } catch (SQLException ex) {
-                    Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-                    Notifications.getError(ex.getMessage());
-                }
-            }
-        }
-    }
-    
-    public static void addItemsComboNotDefault(ComboBox combo, String cadenaSql) {
-        if (!cadenaSql.isEmpty()) {
-            combo.removeAllItems();
-            GestionDB objConnect = null;
-            try {
-                objConnect = new GestionDB();
-                ResultSet rsCbb = objConnect.consultar(cadenaSql);
-                if (rsCbb.next()) {
-                    combo.addItem(rsCbb.getInt(1));
-                    combo.setItemCaption(rsCbb.getInt(1), rsCbb.getString(2));
-                    while(rsCbb.next()){
-                        combo.addItem(rsCbb.getInt(1));
-                        combo.setItemCaption(rsCbb.getInt(1), rsCbb.getString(2));
-                    }
-                }
-            } catch (SQLException | NullPointerException | NamingException ex) {
-                Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-                Notifications.getError(ex.getMessage());
-            } finally {
-                try {
-                    if (objConnect != null)
-                        objConnect.desconectar();
-                } catch (SQLException ex) {
-                    Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-                    Notifications.getError(ex.getMessage());
-                }
-            }
-        }
-    }
-    
-    public static void addItemsComboNotDefaultNotClear(ComboBox combo, String cadenaSql) {
-        if (!cadenaSql.isEmpty()) {
-            GestionDB objConnect = null;
-            try {
-                objConnect = new GestionDB();
-                ResultSet rsCbb = objConnect.consultar(cadenaSql);
-                if (rsCbb.next()) {
-                    combo.addItem(rsCbb.getInt(1));
-                    combo.setItemCaption(rsCbb.getInt(1), rsCbb.getString(2));
-                    while(rsCbb.next()){
-                        combo.addItem(rsCbb.getInt(1));
-                        combo.setItemCaption(rsCbb.getInt(1), rsCbb.getString(2));
-                    }
-                }
-            } catch (SQLException | NullPointerException | NamingException ex) {
-                Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-                Notifications.getError(ex.getMessage());
-            } finally {
-                try {
-                    if (objConnect != null)
-                        objConnect.desconectar();
-                } catch (SQLException ex) {
-                    Logger.getLogger(SeveralProcesses.class.getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-                    Notifications.getError(ex.getMessage());
-                }
-            }
-        }
-    }
-    
-    
     public static Boolean isComponentRequired(ComponentContainer componentContainer) {
         
         ArrayList<ComponentContainer> listComponentContainer = new ArrayList<>();
@@ -853,7 +623,7 @@ public class SeveralProcesses {
             listComponentContainer.remove(0);
         }
         if (!retorno)
-            Notifications.getError("FALTA INFORMACIÓN REQUERIDA");
+            Notification.show("FALTA INFORMACIÓN REQUERIDA", Notification.Type.ERROR_MESSAGE);
         return retorno;
     }
     
@@ -965,18 +735,18 @@ public class SeveralProcesses {
     }
     
     public static Object getCodigoEstudianteEnSesion() {
-        return UI.getCurrent().getSession().getAttribute(VariablesSesion.CODIGO_ESTUDAINTE);
+        return UI.getCurrent().getSession().getAttribute(VariablesSesion.CODIGO_ESTUDIANTE);
     }
     
     public static void cerrarSesion() {
         UI.getCurrent().getSession().setAttribute(VariablesSesion.LOGIN, null);
         UI.getCurrent().getSession().setAttribute(VariablesSesion.NOMBRE_USUARIO, null);
         UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_USUARIO, null);
-        UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_DOCENTE, null);
-        UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_ESTUDAINTE, null);
+        UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_DOCENTE, 0);
+        UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_ESTUDIANTE, 0);
         UI.getCurrent().getSession().close();
         UI.getCurrent().close();
-        UI.getCurrent().getNavigator().navigateTo(Views.REGISTRARNOTAS);
+        UI.getCurrent().getNavigator().navigateTo(Views.LOGIN);
     }
     
     

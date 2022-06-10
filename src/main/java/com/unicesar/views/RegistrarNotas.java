@@ -7,19 +7,17 @@ package com.unicesar.views;
 
 import com.unicesar.beans.Asignatura;
 import com.unicesar.beans.Corte;
+import com.unicesar.beans.Email;
 import com.unicesar.beans.Nota;
 import com.unicesar.beans.NotaDatos;
-import com.unicesar.businesslogic.GestionDB;
-import com.unicesar.businesslogic.GestionDBException;
 import com.unicesar.components.LabelClick;
 import com.unicesar.components.NumberFieldCustom;
 import com.unicesar.components.TableWithFilterSplit;
-import com.unicesar.utils.EmailSender;
 import com.unicesar.utils.Enrutador;
 import com.unicesar.utils.GestionarNota;
 import com.unicesar.utils.Settings;
 import com.unicesar.utils.SeveralProcesses;
-import com.unicesar.utils.StandarEmailSender;
+import com.unicesar.utils.EnviarEmail;
 import com.unicesar.utils.Views;
 import com.vaadin.data.Property;
 import com.vaadin.icons.VaadinIcons;
@@ -39,11 +37,6 @@ import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.ValoTheme;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.naming.NamingException;
 
 /**
  *
@@ -56,12 +49,12 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
     private Label lblCorte;
     private LabelClick lblSalir;
     private Button btnPublicar;
+    private Button btnVerEmails;
     private GridLayout layoutCabecera;
     private TableWithFilterSplit tblAsignaturas;
     private TableWithFilterSplit tblEstudiantes;
     private HorizontalSplitPanel layoutTablas;
     
-    private String cadenaSql;
     private String nombreAsignaturaSeleccionada, nombreCorte;
     private final int codigoCorte = 1;
     
@@ -85,13 +78,27 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
         btnPublicar.addClickListener(e -> {
             publicarNotasAsignatura();
         });
+        btnPublicar = new Button("PUBLICAR", FontAwesome.EYE);
+        btnPublicar.setStyleName("verde");
+        btnPublicar.setEnabled(false);
+        btnPublicar.addClickListener(e -> {
+            publicarNotasAsignatura();
+        });
         
-        layoutCabecera = new GridLayout(3, 2);
+        btnVerEmails = new Button("Ver Emails", FontAwesome.MAIL_FORWARD);
+        btnVerEmails.setStyleName("amarillo");
+        btnVerEmails.setEnabled(true);
+        btnVerEmails.addClickListener(e -> {
+            
+        });
+        
+        layoutCabecera = new GridLayout(4, 2);
         layoutCabecera.addComponent(lblTitulo, 1, 0);
-        layoutCabecera.addComponent(lblSalir.layoutLabel, 2, 0);
+        layoutCabecera.addComponent(lblSalir.layoutLabel, 3, 0);
         layoutCabecera.addComponent(lblNombreDocente, 0, 1);
         layoutCabecera.addComponent(lblCorte, 1, 1);
         layoutCabecera.addComponent(btnPublicar, 2, 1);
+        layoutCabecera.addComponent(btnVerEmails, 3, 1);
         layoutCabecera.setWidth("100%");
         layoutCabecera.setMargin(new MarginInfo(false, true, false, true));
         layoutCabecera.setSpacing(true);
@@ -100,6 +107,7 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
         layoutCabecera.setComponentAlignment(lblNombreDocente, Alignment.MIDDLE_LEFT);
         layoutCabecera.setComponentAlignment(lblCorte, Alignment.MIDDLE_CENTER);
         layoutCabecera.setComponentAlignment(btnPublicar, Alignment.TOP_RIGHT);
+        layoutCabecera.setComponentAlignment(btnVerEmails, Alignment.TOP_RIGHT);
         
         tblAsignaturas = new TableWithFilterSplit("asignatura", "Listado de Asignaturas", true);
         tblAsignaturas.addContainerProperty("codigo", Object.class, null, "Codigo", null, Table.Align.CENTER);
@@ -139,6 +147,8 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
             btnPublicar.setEnabled(!isNotasPublicadas());
             nombreAsignaturaSeleccionada = e.getItem().getItemProperty("asignatura").getValue().toString();
         });
+        
+        
     }
     
     private void setValorLblCorte() {
@@ -236,82 +246,32 @@ public class RegistrarNotas extends VerticalSplitPanel implements View {
     }
     
     private void publicarNotas() {
-        GestionDB objConnect = null;
-        try {
-            objConnect = new GestionDB();
-            objConnect.begin();
-            for ( Object itemId : tblEstudiantes.getItemIds() ) {
-                publicarNota(objConnect, Integer.valueOf(itemId.toString()), codigoCorte);
-            }
-            objConnect.commit();
-            Notification.show("Publicación Exitosa", Notification.Type.ERROR_MESSAGE);
-            btnPublicar.setEnabled(false);
-            for ( Object itemId : tblEstudiantes.getItemIds() ) {
-                new StandarEmailSender(
-                        new EmailSender(
+        for ( Object itemId : tblEstudiantes.getItemIds() ) {
+            publicarNota(Integer.valueOf(itemId.toString()), codigoCorte, Float.valueOf( ( (NumberFieldCustom)tblEstudiantes.getItem(itemId).getItemProperty("nota").getValue() ).getValue()));
+            ( (NumberFieldCustom)tblEstudiantes.getItem(itemId).getItemProperty("nota").getValue() ).setEnabled(false);
+            new EnviarEmail(
+                    new Email(
+                            Integer.valueOf(itemId.toString()), 
                             Settings.EMAILORIGEN, 
                             Settings.EMAILPASSWORD, 
-                            getEmailEstuadiante(itemId), 
-                            "Publicación de Notas - Asignatura " + nombreAsignaturaSeleccionada,
+                            getEmailEstuadiante(Integer.valueOf(itemId.toString())), 
+                            "Publicación de Notas - Asignatura " + nombreAsignaturaSeleccionada, 
                             "Buenas\n\n"
-                                    + "Se informa que las notas de la asignatura " + nombreAsignaturaSeleccionada + " para el " + nombreCorte + " fueron publicadas",
-                            null, 
-                            null,
-                            null,
+                                + "Se informa que las notas de la asignatura " + nombreAsignaturaSeleccionada + " para el " + nombreCorte + " fueron publicadas", 
                             null
-                        )
-                ).start();
-            }
-        } catch (NamingException | SQLException | GestionDBException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-            try {
-                if (objConnect != null) {
-                    objConnect.rollback();
-                }
-            } catch (SQLException ex1) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Rollback - " + SeveralProcesses.getSessionUser(), ex1);
-            }
-        } finally {
-            try {
-                if (objConnect != null) {
-                    objConnect.desconectar();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-            }
+                    )
+            ).start();
+            
         }
+        Notification.show("Publicación Exitosa", Notification.Type.ERROR_MESSAGE);
+        btnPublicar.setEnabled(false);
     }
     
-    private void publicarNota(GestionDB objConnect, int codigoEstudianteAsignatura, int codigoCorte) throws SQLException, GestionDBException {
-        cadenaSql = "UPDATE notas a "
-                + "SET a.publicada = 1 "
-                + "WHERE a.codigo_estudiante_asignatura = " + codigoEstudianteAsignatura + " AND a.codigo_corte = " + codigoCorte;
-        SeveralProcesses.confirmarSentencia(objConnect.insertarActualizarBorrar(cadenaSql, false));
+    private void publicarNota(int codigoEstudianteAsignatura, int codigoCorte, float nota) {
+        Enrutador.publicarNota( new NotaDatos(codigoEstudianteAsignatura, codigoCorte, nota) );
     }
 
-    private String getEmailEstuadiante(Object itemId) {
-        cadenaSql = "SELECT a.email "
-                + "FROM datos_personales a "
-                + "INNER JOIN estudiantes b ON b.codigo_dato_personal = a.codigo_dato_personal "
-                + "INNER JOIN estudiantes_asignaturas c ON c.codigo_estudiante = b.codigo_estudiante AND c.codigo_estudiante_asignatura = " + itemId
-                ;
-        GestionDB objConnect = null;
-        try {
-            objConnect = new GestionDB();
-            ResultSet rs = objConnect.consultar(cadenaSql);
-            if ( rs.next() )
-                return rs.getString(1);
-        } catch (NamingException | SQLException ex) {
-            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, cadenaSql + " - " + SeveralProcesses.getSessionUser(), ex);
-        } finally {
-            try {
-                if (objConnect != null) {
-                    objConnect.desconectar();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, "Cerrando Conexión - " + SeveralProcesses.getSessionUser(), ex);
-            }
-        }
-        return null;
+    private String getEmailEstuadiante(int codigoEstudianteAsignatura) {
+        return Enrutador.getEmailEstudiante(codigoEstudianteAsignatura);
     }
 }

@@ -67,8 +67,8 @@ public class ComboBoxCustom extends ComboBox {
             for (String valor: valores) {
                 addItem(valor);
             }
-        if (cadenaSql != null && !cadenaSql.isEmpty())
-            SeveralProcesses.addItemsComboDefault(this, cadenaSql);
+//        if (cadenaSql != null && !cadenaSql.isEmpty())
+//            SeveralProcesses.addItemsComboDefault(this, cadenaSql);
     }
     
     private void setUpText (String width, Boolean required, String[] valores, String cadenaSql, Boolean enabled) {
@@ -81,8 +81,8 @@ public class ComboBoxCustom extends ComboBox {
             for (String valor: valores) {
                 addItem(valor);
             }
-        if (cadenaSql != null && !cadenaSql.isEmpty())
-            SeveralProcesses.addTextItemsComboDefault(this, cadenaSql);
+//        if (cadenaSql != null && !cadenaSql.isEmpty())
+//            SeveralProcesses.addTextItemsComboDefault(this, cadenaSql);
     }
     
     public void setAltoMinimo() {

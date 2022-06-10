@@ -105,9 +105,12 @@ public class LoginView extends VerticalLayout implements View {
         } else {
             UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_USUARIO, usuario.getCodigoUsuario());
             UI.getCurrent().getSession().setAttribute(VariablesSesion.LOGIN, usuario.getLogin());
-            UI.getCurrent().getSession().setAttribute(VariablesSesion.NOMBRE_USUARIO, usuario.getNombreUsuario());                    
-            UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_DOCENTE, usuario.getCodigoDocente());
-            UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_ESTUDAINTE, usuario.getCodigoEstudiante());
+            UI.getCurrent().getSession().setAttribute(VariablesSesion.NOMBRE_USUARIO, usuario.getNombreUsuario());
+//            if ( usuario.getCodigoDocente() > 0 )
+                UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_DOCENTE, usuario.getCodigoDocente());
+//            if ( usuario.getCodigoEstudiante() > 0 )
+                UI.getCurrent().getSession().setAttribute(VariablesSesion.CODIGO_ESTUDIANTE, usuario.getCodigoEstudiante());
+            
             UI.getCurrent().getNavigator().navigateTo(Views.MAIN);
         }
     }

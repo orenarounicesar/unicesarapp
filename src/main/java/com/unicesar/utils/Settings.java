@@ -18,7 +18,7 @@ public class Settings {
             SEGUNDOSCERRARCONEXION = 290;
             EMAILORIGEN = "orenarotest@gmail.com";
             EMAILPASSWORD = "asgloozhfevmcplc";
-            ENDPOINTGRAPHQL = "http://localhost:5000/graphql";
+            ENDPOINTGRAPHQL = "http://host.docker.internal:5000/graphql";
         
     }
     
